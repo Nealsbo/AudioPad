@@ -83,6 +83,12 @@ struct MediaPlayer {
         Mix_PlayMusic(currentMedia, 0);
     }
 
+    void Rewinding(int value) {
+        if (playerState == MUS_STATE::PAUSED || playerState == MUS_STATE::PLAYING) {
+            Mix_SetMusicPosition((double)value);
+        }
+    }
+
     void Stop() {
         printf("PLayer stop\n");
         if (playerState == MUS_STATE::PAUSED || playerState == MUS_STATE::PLAYING) {
@@ -344,8 +350,10 @@ int main(int, char**) {
             ImGui::Text(timestr); ImGui::SameLine();
 
             ImGui::PushItemWidth(-180);
-
-            ImGui::ProgressBar((float)(currentMediaTime) / medialength, ImVec2(0.0f, 0.0f));
+            if (ImGui::SliderInt("##2", &currentMediaTime, minlength, medialength, "")) {
+                player.Rewinding(currentMediaTime);
+            }
+            //ImGui::ProgressBar((float)(currentMediaTime) / medialength, ImVec2(0.0f, 0.0f));
             ImGui::PopItemWidth(); ImGui::SameLine();
             ImGui::PushItemWidth(120);
             ImGui::SliderInt("Volume", &masterVolume, 0, 100);
