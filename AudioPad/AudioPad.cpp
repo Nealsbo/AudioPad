@@ -149,7 +149,7 @@ std::string openMediaFilesDialog(std::vector<Media>& mediaList) {
 
     std::string dirName;
 
-    nfdu8filteritem_t filters[2] = { { "Media", "mp3,wav" } };
+    nfdu8filteritem_t filters[2] = { { "Media", "mp3,wav,flac" } };
     nfdopendialogu8args_t args = { 0 };
     args.filterList = filters;
     args.filterCount = 1;
@@ -302,13 +302,13 @@ int main(int, char**) {
             if (ImGui::Button("...")) {
                 std::string resDirName = openMediaFilesDialog(mediaList);
 
-                if (resDirName.size() > 0) {
+                if (!resDirName.empty()) {
                     sprintf_s(dir0, "%s\0", resDirName.c_str());
+                    activeMedia = &mediaList[0];
+                    player.SetMedia(activeMedia->file);
+                    selMediaName = activeMedia->name;
                 }
 
-                activeMedia = &mediaList[0];
-                player.SetMedia(activeMedia->file);
-                selMediaName = activeMedia->name;
             }
 
             ImGui::SeparatorText("Player");
