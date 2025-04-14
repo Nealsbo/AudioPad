@@ -86,6 +86,11 @@ void MediaPlayer::Update() {
 
 
 
+//////////////
+//
+// Playlist
+//
+//////////////
 
 PlayList::PlayList(MediaPlayer* pl) {
     player = pl;
@@ -116,11 +121,8 @@ void PlayList::ClearPlayList() {
 }
 
 bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
-    if (hotkeyAssigns.find(hotkey) != hotkeyAssigns.end()) {
-        hotkeyAssigns.emplace(hotkey, id);
-        return true;
-    }
-    return false;
+    hotkeyAssigns[hotkey] = id;
+    return true;
 }
 
 void PlayList::RemoveHotkey(int key, int mod) {
@@ -132,8 +134,10 @@ void PlayList::RemoveHotkey(int key, int mod) {
 
 void PlayList::PlayByHotkey(int key, int mod) {
     HotKeyData hk{ mod, key };
-    if (hotkeyAssigns.find(hk) != hotkeyAssigns.end()) {
-        Media* playMedia = &playList[hotkeyAssigns[hk]];
+    auto it = hotkeyAssigns.find(hk);
+    if (it != hotkeyAssigns.end()) {
+        printf("Hotkey found\n");
+        Media* playMedia = &playList[it->second - 1];
         player->PlayNewMedia(playMedia->file);
     }
 }

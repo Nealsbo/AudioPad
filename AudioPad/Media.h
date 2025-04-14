@@ -9,17 +9,7 @@
 
 #include "nfd.h"
 
-struct Media {
-    Media() {}
-    ~Media() {}
 
-    Mix_Music* file = nullptr;
-    std::string path = "";
-    std::string name = "blank";
-    std::string type = "mp3";
-    uint32_t length = 1;
-    int ID = 0;
-};
 
 enum MUS_STATE {
     IDLE = 0,
@@ -33,9 +23,6 @@ enum MUS_CMD {
     STOP,
     PAUSE
 };
-
-void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath);
-std::string openMediaFilesDialog(std::vector<Media>& mediaList);
 
 struct HotKeyData {
     bool operator==(const HotKeyData& h) const {
@@ -52,6 +39,23 @@ struct std::hash<HotKeyData> {
         return (hash<SDL_Keycode>()(h.keycode) ^ (hash<Uint16>()(h.mod) << 1));
     }
 };
+
+struct Media {
+    Mix_Music* file = nullptr;
+
+    std::string path = "";
+    std::string name = "blank";
+    std::string type = "mp3";
+
+    uint32_t length = 1;
+    int ID = 0;
+
+    bool isHotkey = false;
+    HotKeyData hotkey;
+};
+
+void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath);
+std::string openMediaFilesDialog(std::vector<Media>& mediaList);
 
 struct MediaPlayer {
     MediaPlayer();

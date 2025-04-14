@@ -24,9 +24,6 @@ enum MediaColumnID
     MediaColumnID_Hotkey
 };
 
-
-
-
 const char* MODS1[] = { "", "SHIFT", "CTRL", "ALT", "SHIFT+CTRL", "SHIFT+ALT", "ALT+CTRL", "SHIFT+ALT+CTRL" };
 const char* KEYS1[] = { "", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -148,6 +145,10 @@ void Application::HandleInput() {
             isRunning = false;
         if (event.key.keysym.sym == SDLK_SPACE && event.type == SDL_KEYDOWN) {
             player.FlipPlayPause();
+        }
+        if ((event.key.keysym.sym >= SDLK_1 || event.key.keysym.sym <= SDLK_9) && event.type == SDL_KEYDOWN) {
+            printf("key pressed: %i\n", event.key.keysym.sym - SDLK_0);
+            plist.PlayByHotkey(event.key.keysym.sym - SDLK_0, 0);
         }
     }
 }
@@ -299,7 +300,12 @@ void Application::DrawUI() {
                     if (ImGui::Button("Apply HotKey")) {
                         // Assign hotkey shortcut
                         printf("Hotkey assign\n");
+                        HotKeyData hk = { 0, item_current_4 };
+                        plist.AssignHotkey(item->ID, hk);
+                        item->hotkey.keycode = hk.keycode;
+                        item->isHotkey = true;
                         ImGui::CloseCurrentPopup();
+                        item_current_4 = -1;
                     }
                     ImGui::EndPopup();
                 }
@@ -310,6 +316,14 @@ void Application::DrawUI() {
                 ImGui::TableNextColumn();
                 ImGui::TableSetColumnIndex(2);
                 ImGui::Text("%d:%02d", item->length / 60u, item->length % 60u);
+                ImGui::TableNextColumn();
+                ImGui::TableSetColumnIndex(3);
+                if (item->isHotkey) {
+                    ImGui::Text("%s", KEYS1[item->hotkey.keycode]);
+                }
+                else {
+
+                }
                 ImGui::PopID();
             }
         }
