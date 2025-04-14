@@ -42,6 +42,9 @@
     <ClCompile Include="nfd_win.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Media.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -78,6 +81,9 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="nfd.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Media.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
