@@ -121,6 +121,11 @@ void PlayList::ClearPlayList() {
 }
 
 bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
+    if (hotkeyAssigns[hotkey] != 0) {
+        int oldid = hotkeyAssigns[hotkey];
+        hotkeyAssigns[hotkey] = id;
+        playList[oldid - 1].isHotkey = false;
+    }
     hotkeyAssigns[hotkey] = id;
     return true;
 }
