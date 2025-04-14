@@ -149,6 +149,7 @@ void Application::HandleInput() {
         if ((event.key.keysym.sym >= SDLK_1 || event.key.keysym.sym <= SDLK_9) && event.type == SDL_KEYDOWN) {
             printf("key pressed: %i\n", event.key.keysym.sym - SDLK_0);
             plist.PlayByHotkey(event.key.keysym.sym - SDLK_0, 0);
+            currentMediaName = plist.currentMediaName;
         }
     }
 }
@@ -231,19 +232,20 @@ void Application::DrawUI() {
 
         ImGui::Text("Selected media: "); ImGui::SameLine();
         ImGui::Text(currentMediaName.c_str());
-
-        ImGui::SeparatorText("Hot Key Combo");
-
-        // TODO Clean up
+        ImGui::Text("");
         static int item_current_2 = -1;
         static int item_current_3 = -1;
         static int item_current_4 = -1;
         static int item_current_5 = -1;
+        /*
+        ImGui::SeparatorText("Hot Key Combo");
+
+        // TODO Clean up
         ImGui::PushItemWidth(60);
         ImGui::Combo("Mod", &item_current_2, MODS1, IM_ARRAYSIZE(MODS1)); ImGui::SameLine();
         ImGui::Combo("Key", &item_current_3, KEYS1, IM_ARRAYSIZE(KEYS1));
         ImGui::PopItemWidth();
-
+        */
         //
         // Playlist section
         //

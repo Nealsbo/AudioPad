@@ -139,6 +139,8 @@ void PlayList::PlayByHotkey(int key, int mod) {
         printf("Hotkey found\n");
         Media* playMedia = &playList[it->second - 1];
         player->PlayNewMedia(playMedia->file);
+        currentMediaName = playMedia->name;
+        activeMedia = playMedia;
     }
 }
 
