@@ -2,6 +2,12 @@
 
 
 
+////////////////
+//
+// Media Player
+//
+////////////////
+
 MediaPlayer::MediaPlayer() {}
 MediaPlayer::~MediaPlayer() {}
 
@@ -97,6 +103,7 @@ PlayList::PlayList(MediaPlayer* pl) {
 }
 
 PlayList::~PlayList() {
+    ClearPlayList();
     player = nullptr;
 }
 
@@ -113,6 +120,9 @@ void PlayList::LoadPlayList() {
 }
 
 void PlayList::ClearPlayList() {
+    for (auto& m : playList) {
+        Mix_FreeMusic(m.file);
+    }
     activeMedia = nullptr;
     currentMediaName = "none";
     playListDir = "";

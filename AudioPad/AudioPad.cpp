@@ -25,7 +25,8 @@ enum MediaColumnID
 };
 
 const char* MODS1[] = { "", "SHIFT", "CTRL", "ALT", "SHIFT+CTRL", "SHIFT+ALT", "ALT+CTRL", "SHIFT+ALT+CTRL" };
-const char* KEYS1[] = { "", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+const char* KEYS1[] = { "", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num 1", "num 2", "num 3", "num 4", "num 5", "num 6", "num 7", "num 8", "num 9", "num 0",
+                            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
 void strToSdlk_Conv(int &key, const char* line) {
     int keycode = (int)line[0];
@@ -104,6 +105,10 @@ int Application::Init() {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
 
+    ImGuiStyle& img_style = ImGui::GetStyle();
+    img_style.FrameRounding = 4;
+    //img_style.FramePadding.y = 5;
+
     plist.player = &player;
     return 0;
 }
@@ -159,15 +164,22 @@ void Application::DrawUI() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    {
-        static bool use_work_area = true;
-        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+    static bool use_work_area = true;
+    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
-        ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
+    ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
-        ImGui::Begin("AudioPadPlayer", &p_open, flags);
+    ImGui::Begin("AudioPadPlayer", &p_open, flags);
+
+    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("AudioPadTabBar", tab_bar_flags))
+    
+    //
+    // Construction of ui under label "PlayList"
+    //
+    if (ImGui::BeginTabItem("PlayList")) {
         ImGui::Text("Select Sounds Folder:");
         ImGui::InputText("##", plist.playListDirC, IM_ARRAYSIZE(plist.playListDirC), ImGuiInputTextFlags_ReadOnly);
         ImGui::SameLine();
@@ -346,8 +358,45 @@ void Application::DrawUI() {
         ImGui::SameLine();
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate); ImGui::SameLine();
 
-        ImGui::End();
+        ImGui::EndTabItem();
     }
+
+
+    //
+    // Construction of ui under label "SoundPad"
+    //
+    if (ImGui::BeginTabItem("SoundPad")) {
+        const char* btn_names[] = { "Button 1", "Button 2", "Button 3", "Button 4", "Button 5", "Button 6", "Button 7", "Button 8", "Button 9" };
+        ImVec2 btn_size = ImVec2(180, 120);
+
+        // TODO: Add tooltips for assigned sounds
+        for (int i = 0; i < 9; i++)
+        {
+            ImGui::PushID(i);
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 9.0f, 0.6f, 0.6f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 9.0f, 0.7f, 0.7f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 9.0f, 0.8f, 0.8f));
+            if (ImGui::Button(btn_names[i], btn_size)) {
+                plist.PlayByHotkey(i + 1, 0);
+                printf("%s Pressed\n", btn_names[i]);
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
+            if ((i + 1) % 3 > 0)
+                ImGui::SameLine();
+        }
+
+        ImGui::SeparatorText("End Line");
+
+        ImGui::EndTabItem();
+        if (ImGui::Button("Exit")) {
+            isRunning = false;
+        }
+    }
+
+    ImGui::EndTabBar();
+
+    ImGui::End();
 
     ImGui::Render();
 }
@@ -356,6 +405,8 @@ void Application::Shutdown() {
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
+
+    Mix_CloseAudio();
 
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
