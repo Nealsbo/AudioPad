@@ -1,6 +1,8 @@
 # AudioPad
 
-Quick-and-dirty media player and soundpad(wip)
+Quick-and-dirty simple media player and soundpad(wip)
+
+Play on double click and assigned keys
 
 Used libs(3rd party):
 - SDL2

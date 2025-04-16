@@ -29,8 +29,11 @@ struct HotKeyData {
         return mod == h.mod && keycode == h.keycode;
     }
 
+    std::string GetKeyName();
+
     int mod = 0;
     int keycode = 0;
+    bool isNum = false;
 };
 
 template<>

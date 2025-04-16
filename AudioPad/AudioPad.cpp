@@ -17,20 +17,21 @@
 
 #include "Media.h"
 
-enum MediaColumnID
-{
+
+// TODO:
+// hotkey with mods
+// Media dublicates
+
+enum MediaColumnID {
     MediaColumnID_Name,
     MediaColumnID_Duration,
     MediaColumnID_Hotkey
 };
 
 const char* MODS1[] = { "", "SHIFT", "CTRL", "ALT", "SHIFT+CTRL", "SHIFT+ALT", "ALT+CTRL", "SHIFT+ALT+CTRL" };
-const char* KEYS1[] = { "", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num 1", "num 2", "num 3", "num 4", "num 5", "num 6", "num 7", "num 8", "num 9", "num 0",
+const char* KEYS1[] = { "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Numpad 1", "Numpad 2", "Numpad 3", "Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7", "Numpad 8", "Numpad 9", "Numpad 0",
                             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
-void strToSdlk_Conv(int &key, const char* line) {
-    int keycode = (int)line[0];
-}
 
 class Application {
 public:
@@ -151,11 +152,30 @@ void Application::HandleInput() {
         if (event.key.keysym.sym == SDLK_SPACE && event.type == SDL_KEYDOWN) {
             player.FlipPlayPause();
         }
+        if (event.type == SDL_KEYDOWN) {
+            int keycode = event.key.keysym.sym;
+            int mod = 0;//= SDL_GetModState();
+            printf("key pressed: %i, mod: %i\n", keycode, mod);
+            plist.PlayByHotkey(keycode, mod);
+        }
+
+        /*
         if ((event.key.keysym.sym >= SDLK_1 || event.key.keysym.sym <= SDLK_9) && event.type == SDL_KEYDOWN) {
             printf("key pressed: %i\n", event.key.keysym.sym - SDLK_0);
             plist.PlayByHotkey(event.key.keysym.sym - SDLK_0, 0);
             currentMediaName = plist.currentMediaName;
         }
+        if ((event.key.keysym.sym >= SDLK_a || event.key.keysym.sym <= SDLK_z) && event.type == SDL_KEYDOWN) {
+            printf("key pressed: %i\n", event.key.keysym.sym - SDLK_a);
+            plist.PlayByHotkey(event.key.keysym.sym, 0);
+            currentMediaName = plist.currentMediaName;
+        }
+        if ((event.key.keysym.sym >= SDLK_KP_1 || event.key.keysym.sym <= SDLK_KP_0) && event.type == SDL_KEYDOWN) {
+            printf("key pressed: %i\n", event.key.keysym.sym - SDLK_0);
+            plist.PlayByHotkey(event.key.keysym.sym - SDLK_0, 0);
+            currentMediaName = plist.currentMediaName;
+        }
+        */
     }
 }
 
@@ -314,7 +334,18 @@ void Application::DrawUI() {
                     if (ImGui::Button("Apply HotKey")) {
                         // Assign hotkey shortcut
                         printf("Hotkey assign\n");
-                        HotKeyData hk = { 0, item_current_4 };
+                        int keycode = 0;
+                        int mod = 0;
+
+                        if (item_current_4 > 0 && item_current_4 <= 10) {
+                            keycode = item_current_4 + SDLK_0 - 1;
+                        }  else if (item_current_4 > 10 && item_current_4 <= 20) {
+                            keycode = SDLK_KP_1 + (item_current_4 - 11);
+                        } else if (item_current_4 > 20 && item_current_4 < 47) {
+                            keycode = SDLK_a + (item_current_4 - 21);
+                        }
+
+                        HotKeyData hk = { mod, keycode };
                         plist.AssignHotkey(item->ID, hk);
                         item->hotkey.keycode = hk.keycode;
                         item->isHotkey = true;
@@ -333,7 +364,9 @@ void Application::DrawUI() {
                 ImGui::TableNextColumn();
                 ImGui::TableSetColumnIndex(3);
                 if (item->isHotkey) {
-                    ImGui::Text("%s", KEYS1[item->hotkey.keycode]);
+                    if (!item->hotkey.mod) {
+                        ImGui::Text("%s", item->hotkey.GetKeyName().c_str());
+                    }
                 }
                 else {
 
@@ -377,7 +410,8 @@ void Application::DrawUI() {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 9.0f, 0.7f, 0.7f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 9.0f, 0.8f, 0.8f));
             if (ImGui::Button(btn_names[i], btn_size)) {
-                plist.PlayByHotkey(i + 1, 0);
+                plist.PlayByHotkey(i + SDLK_1, 0);
+                //plist.PlayByHotkey(i + SDLK_KP_1, 0);
                 printf("%s Pressed\n", btn_names[i]);
             }
             ImGui::PopStyleColor(3);
