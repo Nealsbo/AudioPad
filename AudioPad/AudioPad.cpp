@@ -204,7 +204,8 @@ void Application::DrawUI() {
         ImGui::InputText("##", plist.playListDirC, IM_ARRAYSIZE(plist.playListDirC), ImGuiInputTextFlags_ReadOnly);
         ImGui::SameLine();
         if (ImGui::Button("...")) {
-            plist.LoadPlayList();
+            std::vector<std::string> pathes = openMediaFilesDialog();
+            plist.LoadPlayList(pathes);
         }
 
         //
@@ -352,6 +353,13 @@ void Application::DrawUI() {
                         ImGui::CloseCurrentPopup();
                         item_current_4 = -1;
                     }
+                    /*
+                    ImGui::SeparatorText("Remove media");
+                    if (ImGui::Button("Remove")) {
+                        plist.RemoveMedia(item->ID);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    */
                     ImGui::EndPopup();
                 }
 

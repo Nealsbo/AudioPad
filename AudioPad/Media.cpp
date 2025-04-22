@@ -49,6 +49,19 @@ std::unordered_map<int, std::string> keyNames = {
     { SDLK_z, "Z" }
 };
 
+//const char* MODS1[] = { "", "SHIFT", "CTRL", "ALT", "SHIFT+CTRL", "SHIFT+ALT", "ALT+CTRL", "SHIFT+ALT+CTRL" };
+
+std::unordered_map<int, std::string> modNames = {
+    { KMOD_SHIFT, "SHIFT" },
+    { KMOD_CTRL, "CTRL" },
+    { KMOD_ALT,  "ALT" },
+    { KMOD_SHIFT | KMOD_ALT, "SHIFT+CTRL" },
+    { KMOD_SHIFT | KMOD_CTRL, "SHIFT+ALT" },
+    { KMOD_ALT | KMOD_CTRL, "ALT+CTRL" },
+    { KMOD_SHIFT | KMOD_ALT | KMOD_CTRL, "SHIFT+ALT+CTRL"}
+};
+
+
 std::string HotKeyData::GetKeyName() {
     return keyNames[keycode];
 }
@@ -158,16 +171,25 @@ PlayList::~PlayList() {
     player = nullptr;
 }
 
-void PlayList::LoadPlayList() {
-    std::string resDirName = openMediaFilesDialog(playList);
-
-    if (!resDirName.empty()) {
-        sprintf_s(playListDirC, "%s\0", resDirName.c_str());
-        playListDir = playListDirC;
-        activeMedia = &playList[0];
-        player->SetMedia(activeMedia->file);
-        currentMediaName = activeMedia->name;
+void PlayList::LoadPlayList(std::vector<std::string> &pathes) {
+    std::string resDirName;
+    if (pathes.size() == 0) {
+        return;
     }
+
+    for (auto& p : pathes) {
+        AddMedia(p);
+    }
+
+    std::string pathstr = pathes[0];
+    std::size_t subpos = pathstr.find_last_of("\\");
+    resDirName = pathstr.substr(0, subpos);
+
+    sprintf_s(playListDirC, "%s\0", resDirName.c_str());
+    playListDir = playListDirC;
+    activeMedia = &playList[0];
+    player->SetMedia(activeMedia->file);
+    activeMediaName = activeMedia->name;
 }
 
 void PlayList::ClearPlayList() {
@@ -175,10 +197,49 @@ void PlayList::ClearPlayList() {
         Mix_FreeMusic(m.file);
     }
     activeMedia = nullptr;
-    currentMediaName = "none";
+    activeMediaName = "none";
     playListDir = "";
     hotkeyAssigns.clear();
     playList.clear();
+}
+
+void PlayList::AddMedia(std::string mediaPath) {
+    Media audio;
+    static int id = 1;
+    Mix_Music* m = Mix_LoadMUS(mediaPath.c_str());
+
+    if (!m) {
+        printf("Mix_LoadMUS error: %s\n", Mix_GetError());
+        return;
+    }
+
+    std::string pathstr = mediaPath;
+    std::size_t subpos = pathstr.find_last_of("\\");
+
+    audio.path = mediaPath;
+    audio.name = pathstr.substr(subpos + 1);
+    audio.length = Mix_MusicDuration(m);
+    audio.file = m;
+    audio.ID = id;
+    id++;
+    playList.push_back(audio);
+}
+
+void PlayList::RemoveMedia(int id) {
+    for (auto m = playList.begin(); m != playList.end(); m++) {
+        if (m->ID == id) {
+            playList.erase(m);
+            break;
+        }
+    }
+}
+
+void PlayList::PlayMedia(int id) {
+
+}
+
+void PlayList::PlayNextMedia() {
+
 }
 
 bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
@@ -187,6 +248,7 @@ bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
         hotkeyAssigns[hotkey] = id;
         playList[oldid - 1].isHotkey = false;
     }
+
     hotkeyAssigns[hotkey] = id;
     //printf("Assigned key: %i, to id: %i\n", hotkey.keycode, id);
     return true;
@@ -206,7 +268,7 @@ void PlayList::PlayByHotkey(int key, int mod) {
         printf("Hotkey found\n");
         Media* playMedia = &playList[it->second - 1];
         player->PlayNewMedia(playMedia->file);
-        currentMediaName = playMedia->name;
+        activeMediaName = playMedia->name;
         activeMedia = playMedia;
     }
 }
@@ -216,6 +278,7 @@ void PlayList::AssignPlayer(MediaPlayer* pl) {
 }
 
 
+/*
 void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath) {
     Media audio;
     static int id = 1;
@@ -237,9 +300,11 @@ void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath) {
     id++;
     mediaList.push_back(audio);
 }
+*/
 
-std::string openMediaFilesDialog(std::vector<Media>& mediaList) {
+std::vector <std::string> openMediaFilesDialog() {
     const nfdpathset_t* filePathes;
+    std::vector<std::string> pathes;
 
     std::string dirName;
 
@@ -269,7 +334,7 @@ std::string openMediaFilesDialog(std::vector<Media>& mediaList) {
             nfdchar_t* path;
             NFD_PathSet_GetPath(filePathes, i, &path);
             printf("Path %i: %s\n", (int)i, path);
-            addNewMedia(mediaList, path);
+            pathes.push_back(path);
 
             NFD_PathSet_FreePath(path);
         }
@@ -281,8 +346,7 @@ std::string openMediaFilesDialog(std::vector<Media>& mediaList) {
         printf("Error: %s\n", NFD_GetError());
     }
 
-    for (auto& m : mediaList) {
-        printf("name: %s\n", m.name.c_str());
-    }
-    return dirName;
+    for (auto& m : pathes)
+        printf("name: %s\n", m.c_str());
+    return pathes;
 }

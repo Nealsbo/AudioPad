@@ -58,7 +58,7 @@ struct Media {
 };
 
 void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath);
-std::string openMediaFilesDialog(std::vector<Media>& mediaList);
+std::vector <std::string> openMediaFilesDialog();
 
 struct MediaPlayer {
     MediaPlayer();
@@ -86,11 +86,16 @@ struct PlayList {
     PlayList(MediaPlayer* pl = nullptr);
     ~PlayList();
 
-    void LoadPlayList();
+    void LoadPlayList(std::vector<std::string>& pathes);
     void ClearPlayList();
 
-    bool AssignHotkey(int id, const HotKeyData& hotkey);
+    void AddMedia(std::string file_name);
+    void RemoveMedia(int id);
 
+    void PlayMedia(int id);
+    void PlayNextMedia();
+
+    bool AssignHotkey(int id, const HotKeyData& hotkey);
     void RemoveHotkey(int key, int mod);
     void PlayByHotkey(int key, int mod);
 
@@ -98,13 +103,15 @@ struct PlayList {
 
     void CheckOnPlayer();
 
-    char playListDirC[128] = { 0 };
+    char playListDirC[256] = { 0 };
     std::string playListDir = "";
-
     std::vector<Media> playList;
+
     std::unordered_map<HotKeyData, int> hotkeyAssigns;
 
-    MediaPlayer* player = nullptr;
-    std::string currentMediaName = "none";
     Media* activeMedia = nullptr;
+    int activeMediaId = 0;
+    std::string activeMediaName = "none";
+
+    MediaPlayer* player = nullptr;
 };
