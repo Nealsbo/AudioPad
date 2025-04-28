@@ -10,5 +10,5 @@ Used libs(3rd party):
 - ImGui
 - Native File Dialog Extended
 
-- # App preview(WIP)
+# App preview(WIP)
 ![Screenshot](https://github.com/Nealsbo/AudioPad/blob/master/screen1.png)
