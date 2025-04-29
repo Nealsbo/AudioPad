@@ -201,7 +201,8 @@ void Application::DrawUI() {
     // Construction of ui under label "PlayList"
     //
     if (ImGui::BeginTabItem("PlayList")) {
-        ImGui::Text("Select Sounds Folder:");
+        ImGui::Text("Selected Sounds Folder:");
+        ImGui::SameLine();
         ImGui::InputText("##", plist.playListDirC, IM_ARRAYSIZE(plist.playListDirC), ImGuiInputTextFlags_ReadOnly);
         ImGui::SameLine();
         if (ImGui::Button("...")) {
@@ -323,6 +324,8 @@ void Application::DrawUI() {
                         player.PlayNewMedia(item->file);
                         currentMediaName = item->name;
                         plist.activeMedia = item;
+                        plist.activeMediaIndex = selected_item;
+                        printf("Selected item number is: %i\n", selected_item);
                     }
                 }
 

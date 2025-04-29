@@ -69,6 +69,7 @@ void PlayList::RemoveMedia(int id) {
             if (activeMedia->ID == id) {
                 player->Eject();
             }
+            Mix_FreeMusic(m->file);
 
             playList.erase(m);
             break;

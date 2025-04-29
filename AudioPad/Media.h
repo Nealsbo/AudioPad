@@ -57,7 +57,6 @@ struct Media {
     HotKeyData hotkey;
 };
 
-void addNewMedia(std::vector<Media>& mediaList, const char* mediaPath);
 std::vector <std::string> openMediaFilesDialog();
 
 struct MediaPlayer {

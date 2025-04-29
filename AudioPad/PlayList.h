@@ -32,6 +32,7 @@ public:
     Media* activeMedia = nullptr;
     int activeMediaId = 0;
     std::string activeMediaName = "none";
+    int activeMediaIndex = 0;
 
     MediaPlayer* player = nullptr;
 };
