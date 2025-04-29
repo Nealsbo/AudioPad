@@ -66,14 +66,23 @@ void PlayList::AddMedia(std::string mediaPath) {
 void PlayList::RemoveMedia(int id) {
     for (auto m = playList.begin(); m != playList.end(); m++) {
         if (m->ID == id) {
+            if (activeMedia->ID == id) {
+                player->Eject();
+            }
+
             playList.erase(m);
             break;
         }
     }
 }
 
-void PlayList::PlayMedia(int id) {
+Media* PlayList::FindMedia(int id) {
+    auto it = std::find_if(playList.begin(), playList.end(), 
+        [&id](const Media& m) {
+            return m.ID == id;
+    });
 
+    return &playList[it - playList.begin()];
 }
 
 void PlayList::PlayNextMedia() {
@@ -88,7 +97,7 @@ bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
     }
 
     hotkeyAssigns[hotkey] = id;
-    //printf("Assigned key: %i, to id: %i\n", hotkey.keycode, id);
+    printf("Assigned key: %i, to id: %i\n", hotkey.keycode, id);
     return true;
 }
 
@@ -104,7 +113,7 @@ void PlayList::PlayByHotkey(int key, int mod) {
     auto it = hotkeyAssigns.find(hk);
     if (it != hotkeyAssigns.end()) {
         printf("Hotkey found\n");
-        Media* playMedia = &playList[it->second - 1];
+        Media* playMedia = FindMedia(it->second);
         player->PlayNewMedia(playMedia->file);
         activeMediaName = playMedia->name;
         activeMedia = playMedia;

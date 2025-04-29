@@ -354,13 +354,13 @@ void Application::DrawUI() {
                         ImGui::CloseCurrentPopup();
                         item_current_4 = -1;
                     }
-                    /*
+                    
                     ImGui::SeparatorText("Remove media");
                     if (ImGui::Button("Remove")) {
                         plist.RemoveMedia(item->ID);
                         ImGui::CloseCurrentPopup();
                     }
-                    */
+                    
                     ImGui::EndPopup();
                 }
 

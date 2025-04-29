@@ -81,8 +81,9 @@ void MediaPlayer::SetMedia(Mix_Music* m) {
 }
 
 void MediaPlayer::Eject() {
+    Stop();
     playingMedia = nullptr;
-    hasMedia = true;
+    hasMedia = false;
 }
 
 void MediaPlayer::Play() {

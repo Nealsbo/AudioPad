@@ -12,7 +12,7 @@ public:
     void AddMedia(std::string file_name);
     void RemoveMedia(int id);
 
-    void PlayMedia(int id);
+    Media* FindMedia(int id);
     void PlayNextMedia();
 
     bool AssignHotkey(int id, const HotKeyData& hotkey);
