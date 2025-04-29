@@ -141,6 +141,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="nfd_win.cpp" />
     <ClCompile Include="Media.cpp" />
+    <ClCompile Include="PlayList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -158,6 +159,7 @@
     <ClInclude Include="nfd.hpp" />
     <ClInclude Include="nfd_sdl2.h" />
     <ClInclude Include="Media.h" />
+    <ClInclude Include="PlayList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
