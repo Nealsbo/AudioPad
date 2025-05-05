@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <unordered_map>

@@ -1,4 +1,6 @@
-﻿#include <Windows.h>
+﻿#ifdef WIN32
+#include <Windows.h>
+#endif
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl2.h"
@@ -249,8 +251,11 @@ void Application::DrawUI() {
             playingMediaTime = player.GetPlayingMediaTime();
             medialength = plist.activeMedia->length;
         }
-
+#ifndef WIN32
+        snprintf(timestr, sizeof(timestr), "%i:%02i/%i:%02i\0", playingMediaTime / 60, playingMediaTime % 60, medialength / 60, medialength % 60);
+#else
         sprintf_s(timestr, "%i:%02i/%i:%02i\0", playingMediaTime / 60, playingMediaTime % 60, medialength / 60, medialength % 60);
+#endif
         ImGui::Text(timestr); ImGui::SameLine();
 
         ImGui::PushItemWidth(-180);
@@ -310,7 +315,11 @@ void Application::DrawUI() {
             for (int row_n = clipper.DisplayStart; row_n < clipper.DisplayEnd; row_n++) {
                 char label[32];
                 Media* item = &plist.playList[row_n];
+#ifndef WIN32
+                snprintf(label, sizeof(label), "%04d", item->ID);
+#else
                 sprintf_s(label, "%04d", item->ID);
+#endif
                 ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick;
                 const bool item_is_selected = selection.contains(item->ID);
 

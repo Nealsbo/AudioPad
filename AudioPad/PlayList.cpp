@@ -22,8 +22,11 @@ void PlayList::LoadPlayList(std::vector<std::string>& pathes) {
     std::string pathstr = pathes[0];
     std::size_t subpos = pathstr.find_last_of("\\");
     resDirName = pathstr.substr(0, subpos);
-
+#ifndef WIN32
+    snprintf(playListDirC, sizeof(playListDirC), "%s\0", resDirName.c_str());
+#else
     sprintf_s(playListDirC, "%s\0", resDirName.c_str());
+#endif
     playListDir = playListDirC;
     activeMedia = &playList[0];
     player->SetMedia(activeMedia->file);
