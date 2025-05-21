@@ -21,6 +21,10 @@ public:
 
     void AssignPlayer(MediaPlayer* pl);
 
+    void SortByID(bool isAsc);
+    void SortByName(bool isAsc);
+    void SortByDuration(bool isAsc);
+
     void CheckOnPlayer();
 
     char playListDirC[256] = { 0 };

@@ -26,12 +26,35 @@
 // Media dublicates
 
 enum MediaColumnID {
+    MediaColumnID_ID,
     MediaColumnID_Name,
     MediaColumnID_Duration,
     MediaColumnID_Hotkey
 };
 
-const char* MODS1[] = { "", "SHIFT", "CTRL", "ALT", "SHIFT+CTRL", "SHIFT+ALT", "ALT+CTRL", "SHIFT+ALT+CTRL" };
+const char* MODS1[] = {
+    "",
+    "SHIFT",
+    "CTRL",
+    "ALT",
+    "SHIFT+CTRL",
+    "SHIFT+ALT",
+    "ALT+CTRL",
+    "SHIFT+ALT+CTRL"
+};
+const unsigned int MODS1_REL_KEYMOD[] = {
+    0,
+    KMOD_SHIFT,
+    KMOD_CTRL,
+    KMOD_ALT,
+    KMOD_SHIFT | KMOD_CTRL,
+    KMOD_SHIFT | KMOD_ALT,
+    KMOD_ALT   | KMOD_CTRL,
+    KMOD_SHIFT | KMOD_ALT | KMOD_CTRL,
+};
+
+
+
 const char* KEYS1[] = { "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Numpad 1", "Numpad 2", "Numpad 3", "Numpad 4", "Numpad 5", "Numpad 6", "Numpad 7", "Numpad 8", "Numpad 9", "Numpad 0",
                             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
@@ -157,7 +180,7 @@ void Application::HandleInput() {
         }
         if (event.type == SDL_KEYDOWN) {
             int keycode = event.key.keysym.sym;
-            int mod = 0;//= SDL_GetModState();
+            int mod = SDL_GetModState();
             printf("key pressed: %i, mod: %i\n", keycode, mod);
             plist.PlayByHotkey(keycode, mod);
         }
@@ -299,12 +322,35 @@ void Application::DrawUI() {
         ImGui::BeginTable("Audio List", 4, tableFlags, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 15), 0.0f);
 
         //ImGuiTableColumnFlags_DefaultSort
-        ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f, MediaColumnID_Name);
+        ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f, MediaColumnID_ID);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 640.0f, MediaColumnID_Name);
         ImGui::TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed, 80.0f, MediaColumnID_Duration);
         ImGui::TableSetupColumn("HotKey", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthStretch, 0.0f, MediaColumnID_Hotkey);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+
+        if (ImGuiTableSortSpecs* sort_specs = ImGui::TableGetSortSpecs()) {
+            if (sort_specs->SpecsDirty) {
+                switch (sort_specs->Specs->ColumnUserID) {
+                case MediaColumnID_ID:
+                    plist.SortByID(sort_specs->Specs->SortDirection == ImGuiSortDirection_Ascending);
+                    break;
+
+                case MediaColumnID_Name:
+                    plist.SortByName(sort_specs->Specs->SortDirection == ImGuiSortDirection_Ascending);
+                    break;
+
+                case MediaColumnID_Duration:
+                    plist.SortByDuration(sort_specs->Specs->SortDirection == ImGuiSortDirection_Ascending);
+                    break;
+
+                default:
+                    break;
+                }
+
+                sort_specs->SpecsDirty = false;
+            }
+        }
 
         static ImVector<int> selection;
         static int selected_item = 0;
@@ -327,6 +373,7 @@ void Application::DrawUI() {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
 
+                // TODO: Selectable on one click
                 if (ImGui::Selectable(label, selected_item == row_n, selectable_flags)) {
                     if (ImGui::IsMouseDoubleClicked(0)) {
                         selected_item = row_n;
@@ -343,7 +390,7 @@ void Application::DrawUI() {
 
                 if (ImGui::BeginPopupContextItem()) {
                     ImGui::SeparatorText("Select HotKey");
-                    //ImGui::Text("Mod"); ImGui::SameLine(); ImGui::Combo("##key5", &item_current_5, MODS1, IM_ARRAYSIZE(MODS1));
+                    ImGui::Text("Mod"); ImGui::SameLine(); ImGui::Combo("##key5", &item_current_5, MODS1, IM_ARRAYSIZE(MODS1));
                     ImGui::Text("Key"); ImGui::SameLine(); ImGui::Combo("##key4", &item_current_4, KEYS1, IM_ARRAYSIZE(KEYS1));
                     if (ImGui::Button("Apply HotKey")) {
                         // Assign hotkey shortcut
@@ -359,12 +406,16 @@ void Application::DrawUI() {
                             keycode = SDLK_a + (item_current_4 - 21);
                         }
 
+                        mod = MODS1_REL_KEYMOD[item_current_5];
+
                         HotKeyData hk = { mod, keycode };
                         plist.AssignHotkey(item->ID, hk);
                         item->hotkey.keycode = hk.keycode;
+                        item->hotkey.mod = hk.mod;
                         item->isHotkey = true;
                         ImGui::CloseCurrentPopup();
                         item_current_4 = -1;
+                        item_current_5 = -1;
                     }
                     
                     ImGui::SeparatorText("Remove media");
@@ -387,6 +438,8 @@ void Application::DrawUI() {
                 if (item->isHotkey) {
                     if (!item->hotkey.mod) {
                         ImGui::Text("%s", item->hotkey.GetKeyName().c_str());
+                    } else {
+                        ImGui::Text("%s+%s", item->hotkey.GetModName().c_str(), item->hotkey.GetKeyName().c_str());
                     }
                 }
                 else {

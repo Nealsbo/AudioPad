@@ -31,6 +31,7 @@ struct HotKeyData {
     }
 
     std::string GetKeyName();
+    std::string GetModName();
 
     int mod = 0;
     int keycode = 0;

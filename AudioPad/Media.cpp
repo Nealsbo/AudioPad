@@ -66,6 +66,10 @@ std::string HotKeyData::GetKeyName() {
     return keyNames[keycode];
 }
 
+std::string HotKeyData::GetModName() {
+    return modNames[mod];
+}
+
 ////////////////
 //
 // Media Player

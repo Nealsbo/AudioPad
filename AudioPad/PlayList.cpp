@@ -1,5 +1,8 @@
 #include "PlayList.h"
 
+#include <algorithm>
+
+
 PlayList::PlayList(MediaPlayer* pl) {
     player = pl;
 }
@@ -101,7 +104,7 @@ bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
     }
 
     hotkeyAssigns[hotkey] = id;
-    printf("Assigned key: %i, to id: %i\n", hotkey.keycode, id);
+    printf("Assigned key: %i, with mod: %i to id: %i\n", hotkey.keycode, hotkey.mod, id);
     return true;
 }
 
@@ -113,7 +116,15 @@ void PlayList::RemoveHotkey(int key, int mod) {
 }
 
 void PlayList::PlayByHotkey(int key, int mod) {
-    HotKeyData hk{ mod, key };
+    int hkmod = mod;
+    //expand key modes to l and r keys
+    if (mod & KMOD_SHIFT) hkmod |= KMOD_SHIFT;
+    if (mod & KMOD_ALT) hkmod |= KMOD_ALT;
+    if (mod & KMOD_CTRL) hkmod |= KMOD_CTRL;
+
+    printf("Check hotkey: key %i, mod %i\n", key, hkmod);
+
+    HotKeyData hk{ hkmod, key };
     auto it = hotkeyAssigns.find(hk);
     if (it != hotkeyAssigns.end()) {
         printf("Hotkey found\n");
@@ -126,4 +137,26 @@ void PlayList::PlayByHotkey(int key, int mod) {
 
 void PlayList::AssignPlayer(MediaPlayer* pl) {
     player = pl;
+}
+
+void PlayList::SortByID(bool isAsc = true) {
+    if (isAsc)
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.ID < b.ID; });
+    else
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.ID > b.ID; });
+}
+
+// TODO: case insensitive
+void PlayList::SortByName(bool isAsc = true) {
+    if (isAsc)
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.name.compare(b.name) >= 0; });
+    else
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.name.compare(b.name) < 0; });
+}
+
+void PlayList::SortByDuration(bool isAsc = true) {
+    if (isAsc)
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.length < b.length; });
+    else
+        std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.length > b.length; });
 }
