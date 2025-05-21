@@ -89,11 +89,23 @@ Media* PlayList::FindMedia(int id) {
             return m.ID == id;
     });
 
+    if (it == playList.end()) {
+        return nullptr;
+    }
+
     return &playList[it - playList.begin()];
 }
 
-void PlayList::PlayNextMedia() {
+void PlayList::SetNextMedia(int id) {
 
+}
+
+void PlayList::PlayPrevMedia() {
+    printf("Play previous media\n");
+}
+
+void PlayList::PlayNextMedia() {
+    printf("Play previous media\n");
 }
 
 bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
@@ -106,6 +118,14 @@ bool PlayList::AssignHotkey(int id, const HotKeyData& hotkey) {
     hotkeyAssigns[hotkey] = id;
     printf("Assigned key: %i, with mod: %i to id: %i\n", hotkey.keycode, hotkey.mod, id);
     return true;
+}
+
+int PlayList::GetIDByHotkey(const HotKeyData& hotkey) {
+    if (hotkeyAssigns.find(hotkey) != hotkeyAssigns.end()) {
+        return hotkeyAssigns[hotkey];
+    } else {
+        return -1;
+    }
 }
 
 void PlayList::RemoveHotkey(int key, int mod) {
@@ -159,4 +179,19 @@ void PlayList::SortByDuration(bool isAsc = true) {
         std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.length < b.length; });
     else
         std::sort(playList.begin(), playList.end(), [](const Media& a, const Media& b) { return a.length > b.length; });
+}
+
+void PlayList::SetAutoMode(bool mode) {
+    printf("Change auto mode to %s\n", mode ? "true" : "false");
+    isAutoPlay = mode;
+}
+
+void PlayList::SetLoopMode(bool mode) {
+    printf("Change loop mode to %s\n", mode ? "true" : "false");
+    isLoopPlay = mode;
+}
+
+void PlayList::SetShuffleMode(bool mode) {
+    printf("Change shuffle mode to %s\n", mode ? "true" : "false");
+    isShufflePlay = mode;
 }

@@ -210,6 +210,10 @@ void Application::DrawUI() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
+    static bool autoPlayCheck = false;
+    static bool shuffleCheck = false;
+    static bool loopPlayCheck = false;
+
     static bool use_work_area = true;
     static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 
@@ -263,6 +267,17 @@ void Application::DrawUI() {
             player.Stop();
         }
         ImGui::SameLine();
+        /*
+        if (ImGui::Button("Prev")) {
+            plist.PlayPrevMedia();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Next")) {
+            plist.PlayNextMedia();
+        }
+        ImGui::SameLine();
+        */
+
         ImGui::PopItemWidth();
 
         char timestr[64] = { 0 };
@@ -300,15 +315,24 @@ void Application::DrawUI() {
         static int item_current_3 = -1;
         static int item_current_4 = -1;
         static int item_current_5 = -1;
-        /*
-        ImGui::SeparatorText("Hot Key Combo");
 
-        // TODO Clean up
-        ImGui::PushItemWidth(60);
-        ImGui::Combo("Mod", &item_current_2, MODS1, IM_ARRAYSIZE(MODS1)); ImGui::SameLine();
-        ImGui::Combo("Key", &item_current_3, KEYS1, IM_ARRAYSIZE(KEYS1));
-        ImGui::PopItemWidth();
+        /*
+        //TODO: move to better place
+        if (ImGui::Checkbox("Auto play", &autoPlayCheck)) {
+            plist.SetAutoMode(autoPlayCheck);
+        }
+        ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+        if (ImGui::Checkbox("Shuffle", &shuffleCheck)) {
+            plist.SetShuffleMode(shuffleCheck);
+        }
+        ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+        if (ImGui::Checkbox("Loop", &loopPlayCheck)) {
+            plist.SetLoopMode(loopPlayCheck);
+        }
         */
+
+
+
         //
         // Playlist section
         //
@@ -382,6 +406,8 @@ void Application::DrawUI() {
                         plist.activeMedia = item;
                         plist.activeMediaIndex = selected_item;
                         printf("Selected item number is: %i\n", selected_item);
+                    } else {
+                        selected_item = row_n;
                     }
                 }
 
@@ -389,9 +415,12 @@ void Application::DrawUI() {
                 //ImGui::OpenPopupOnItemClick("select_key_popup", ImGuiPopupFlags_MouseButtonRight);
 
                 if (ImGui::BeginPopupContextItem()) {
+                    ImGui::PushItemWidth(200);
+                    ImGui::Text(item->name.c_str());
+                    ImGui::PopItemWidth();
                     ImGui::SeparatorText("Select HotKey");
-                    ImGui::Text("Mod"); ImGui::SameLine(); ImGui::Combo("##key5", &item_current_5, MODS1, IM_ARRAYSIZE(MODS1));
-                    ImGui::Text("Key"); ImGui::SameLine(); ImGui::Combo("##key4", &item_current_4, KEYS1, IM_ARRAYSIZE(KEYS1));
+                    ImGui::Text("Mod"); ImGui::SameLine(); ImGui::PushItemWidth(160); ImGui::Combo("##key5", &item_current_5, MODS1, IM_ARRAYSIZE(MODS1)); ImGui::PopItemWidth();
+                    ImGui::Text("Key"); ImGui::SameLine(); ImGui::PushItemWidth(160); ImGui::Combo("##key4", &item_current_4, KEYS1, IM_ARRAYSIZE(KEYS1)); ImGui::PopItemWidth();
                     if (ImGui::Button("Apply HotKey")) {
                         // Assign hotkey shortcut
                         printf("Hotkey assign\n");
@@ -421,6 +450,10 @@ void Application::DrawUI() {
                     ImGui::SeparatorText("Remove media");
                     if (ImGui::Button("Remove")) {
                         plist.RemoveMedia(item->ID);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SeparatorText("Window");
+                    if (ImGui::Button("Close")) {
                         ImGui::CloseCurrentPopup();
                     }
                     
@@ -455,6 +488,7 @@ void Application::DrawUI() {
             player.Stop();
             player.Eject();
             plist.ClearPlayList();
+            currentMediaName = "";
         }
 
         ImGui::SeparatorText("End Line");
@@ -488,6 +522,40 @@ void Application::DrawUI() {
                 //plist.PlayByHotkey(i + SDLK_KP_1, 0);
                 printf("%s Pressed\n", btn_names[i]);
             }
+
+            Media* trackById = plist.FindMedia(plist.GetIDByHotkey({ 0, SDLK_1 + i }));
+            ImGui::SetItemTooltip(trackById ? trackById->name.c_str() : "Not assigned");
+
+            if (ImGui::BeginPopupContextItem()) {
+                static int button_item_sel = 0;
+                static bool button_time_highlighted = 0;
+                ImGui::SeparatorText("Select Media");
+                ImGui::Text("For %s:\n", btn_names[i]);
+
+                if (ImGui::BeginListBox("##mediaListBox")) {
+                    for (int n = 0; n < plist.playList.size(); n++) {
+                        const bool is_selected = (button_item_sel == n);
+                        if (ImGui::Selectable(plist.playList[n].name.c_str(), is_selected)) {
+                            HotKeyData hk = { 0, SDLK_1 + i };
+                            plist.AssignHotkey(n + 1, hk);
+                            plist.playList[n].hotkey = hk;
+                            plist.playList[n].isHotkey = true;
+                            ImGui::CloseCurrentPopup();
+                        }
+
+                        //if (is_selected) ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndListBox();
+                }
+
+                ImGui::SeparatorText("Window");
+                if (ImGui::Button("Close")) {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
             ImGui::PopStyleColor(3);
             ImGui::PopID();
             if ((i + 1) % 3 > 0)
